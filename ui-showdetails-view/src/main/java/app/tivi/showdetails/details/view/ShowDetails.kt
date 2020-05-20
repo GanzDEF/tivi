@@ -71,6 +71,7 @@ import androidx.ui.layout.preferredHeightIn
 import androidx.ui.layout.preferredSize
 import androidx.ui.layout.preferredSizeIn
 import androidx.ui.layout.preferredWidth
+import androidx.ui.layout.width
 import androidx.ui.layout.wrapContentHeight
 import androidx.ui.layout.wrapContentSize
 import androidx.ui.livedata.observeAsState
@@ -592,26 +593,36 @@ private fun RelatedShows(
     // TODO: ideally we would use AdapterList here, but it only works for vertical lists, not
     // horizontal
 
-    HorizontalScroller(modifier = modifier.paddingHV(vertical = 8.dp)) {
-        Row(modifier.paddingHV(horizontal = 16.dp)) {
+    HorizontalScroller(modifier = modifier) {
+        Row(modifier.paddingHV(horizontal = 16.dp, vertical = 8.dp)) {
             related.forEachIndexed { index, relatedEntry ->
-                val poster = relatedEntry.images.findHighestRatedPoster()
-                if (poster != null) {
-                    Card {
-                        Clickable(
-                            onClick = { actioner(OpenShowDetails(relatedEntry.show.id)) },
-                            modifier = Modifier.ripple()
-                        ) {
-                            CoilImageWithCrossfade(
-                                poster,
-                                modifier = Modifier.aspectRatio(2 / 3f).preferredWidth(64.dp)
-                            )
+                Card(Modifier.width(64.dp).aspectRatio(2 / 3f)) {
+                    Clickable(
+                        onClick = { actioner(OpenShowDetails(relatedEntry.show.id)) },
+                        modifier = Modifier.ripple()
+                    ) {
+                        Stack {
+                            ProvideEmphasis(EmphasisAmbient.current.medium) {
+                                Text(
+                                    text = relatedEntry.show.title ?: "No title",
+                                    style = MaterialTheme.typography.caption,
+                                    modifier = Modifier.padding(4.dp)
+                                        .gravity(Alignment.CenterStart)
+                                )
+                            }
+                            val poster = relatedEntry.images.findHighestRatedPoster()
+                            if (poster != null) {
+                                CoilImageWithCrossfade(
+                                    poster,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
                     }
-                    if (index + 1 < related.size) {
-                        // Add a spacer if there are still more items to add
-                        Spacer(modifier = Modifier.preferredWidth(4.dp))
-                    }
+                }
+                if (index + 1 < related.size) {
+                    // Add a spacer if there are still more items to add
+                    Spacer(modifier = Modifier.preferredWidth(4.dp))
                 }
             }
         }
